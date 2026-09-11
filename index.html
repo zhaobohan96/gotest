@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>围棋训练平台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .container {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #fff;
+            margin-bottom: 10px;
+            letter-spacing: 4px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            color: rgba(255,255,255,0.85);
+            margin-bottom: 50px;
+            letter-spacing: 2px;
+        }
+
+        .cards {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 40px 30px;
+            width: 320px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+        }
+
+        .card-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 1.4em;
+            font-weight: 600;
+            color: #2c2c2c;
+            margin-bottom: 12px;
+            letter-spacing: 2px;
+        }
+
+        .card-desc {
+            font-size: 0.95em;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .card-tag {
+            display: inline-block;
+            padding: 6px 16px;
+            background: #f0f2f5;
+            border-radius: 20px;
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .card-jueyi .card-tag {
+            background: #e8f4fd;
+            color: #1a73e8;
+        }
+
+        .card-guanzi .card-tag {
+            background: #e8f8e8;
+            color: #2d8a4e;
+        }
+
+        footer {
+            margin-top: 50px;
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9em;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 720px) {
+            h1 { font-size: 1.8em; }
+            .subtitle { font-size: 1em; margin-bottom: 30px; }
+            .cards { flex-direction: column; align-items: center; gap: 20px; }
+            .card { width: 100%; max-width: 320px; padding: 30px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>围棋训练平台</h1>
+        <p class="subtitle">选择你的训练模式</p>
+
+        <div class="cards">
+            <a href="jueyi/" class="card card-jueyi">
+                <div class="card-icon">🎯</div>
+                <div class="card-title">绝艺的一手</div>
+                <div class="card-desc">围棋妙手精选，欣赏高手的精彩着法，学习实战中的精妙手筋</div>
+                <span class="card-tag">1834 道题目</span>
+            </a>
+
+            <a href="guanzi/" class="card card-guanzi">
+                <div class="card-icon">🧮</div>
+                <div class="card-title">官子练习</div>
+                <div class="card-desc">官子目数计算训练，提升终盘收官能力，支持测试模式</div>
+                <span class="card-tag">233 道题目</span>
+            </a>
+        </div>
+    </div>
+
+    <footer>围棋训练平台 - 提升棋艺的实用工具</footer>
+</body>
+</html>
