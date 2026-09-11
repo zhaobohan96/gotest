@@ -491,6 +491,7 @@
             answerMove = null;
             showAnswer = false;
             answerBtn.dataset.active = 'false';
+            answerBtn.textContent = '显示答案';
             var moveRegex = /;([BW])\[([^\]]*)\]/g;
             var moveMatch = moveRegex.exec(sgfContent);
             if (moveMatch && moveMatch[2]) {
@@ -499,10 +500,10 @@
                     x: moveMatch[2].charCodeAt(0) - 97,
                     y: moveMatch[2].charCodeAt(1) - 97
                 };
-                turnInfo.dataset.value = moveMatch[1] === 'B' ? 'black' : 'white';
+                turnInfo.textContent = moveMatch[1] === 'B' ? '黑棋' : '白棋';
             } else {
                 answerMove = null;
-                turnInfo.dataset.value = 'black';
+                turnInfo.textContent = '黑棋';
             }
 
             board = new WGo.Board(boardElem, {
