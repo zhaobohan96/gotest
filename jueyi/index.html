@@ -660,6 +660,7 @@
                             sgfFiles.push(n + '.sgf');
                         }
                     }
+                    loadChunk(0);
                 } else {
                     throw new Error('no manifest');
                 }
@@ -686,6 +687,7 @@
             infoNumber.textContent = sgfFiles[index].replace('.sgf', '');
             updateButtons();
             updateProgress();
+            boardElem.innerHTML = '<div class="loading">加载中...</div>';
 
             if (manifest) {
                 const num = parseInt(sgfFiles[index].replace('.sgf', ''));
