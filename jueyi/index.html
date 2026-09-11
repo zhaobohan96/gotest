@@ -51,21 +51,6 @@
             letter-spacing: 1px;
         }
 
-        .lang-toggle {
-            position: absolute;
-            top: 12px;
-            right: 20px;
-            padding: 4px 10px;
-            font-size: 12px;
-            border: 1px solid #d0d3d7;
-            border-radius: 4px;
-            background: #fff;
-            color: #666;
-            cursor: pointer;
-            transition: all 0.15s ease;
-        }
-        .lang-toggle:hover { background: #f5f6f7; border-color: #b0b4b8; }
-
         .progress-bar {
             background: #fff;
             border-bottom: 1px solid #dde0e4;
@@ -353,9 +338,8 @@
 <body>
     <header>
         <a href="../" class="home-link" title="返回首页">← 首页</a>
-        <h1 data-i18n="title">绝艺的一手</h1>
-        <p class="subtitle" data-i18n="subtitle">围棋妙手精选</p>
-        <button id="langBtn" class="lang-toggle">日本語</button>
+        <h1>绝艺的一手</h1>
+        <p class="subtitle">围棋妙手精选</p>
     </header>
 
     <div class="progress-bar">
@@ -370,132 +354,52 @@
     <div class="page">
         <div class="board-wrap">
             <div class="board-inner">
-                <div id="board"><div class="loading" data-i18n="loading">正在加载...</div></div>
+                <div id="board"><div class="loading">正在加载...</div></div>
             </div>
         </div>
 
         <div class="side">
             <div class="panel">
-                <div class="panel-title" data-i18n="nav">导航</div>
+                <div class="panel-title">导航</div>
                 <div class="nav-grid">
-                    <button id="prevBtn" class="btn" disabled data-i18n="prev">上一个</button>
-                    <button id="nextBtn" class="btn" disabled data-i18n="next">下一个</button>
-                    <button id="randomBtn" class="btn btn-dark btn-full" data-i18n="random">随机一题</button>
+                    <button id="prevBtn" class="btn" disabled>上一个</button>
+                    <button id="nextBtn" class="btn" disabled>下一个</button>
+                    <button id="randomBtn" class="btn btn-dark btn-full">随机一题</button>
                 </div>
             </div>
 
             <div class="panel">
-                <div class="panel-title" data-i18n="ops">操作</div>
+                <div class="panel-title">操作</div>
                 <div class="trial-row">
                     <button id="blackBtn" class="stone-btn black active" title="黑子"></button>
                     <button id="whiteBtn" class="stone-btn white" title="白子"></button>
-                    <button id="clearBtn" class="clear-btn" data-i18n="clear">清除</button>
+                    <button id="clearBtn" class="clear-btn">清除</button>
                 </div>
                 <div class="op-row">
-                    <button id="answerBtn" class="btn btn-answer" data-i18n="showAnswer">显示答案</button>
+                    <button id="answerBtn" class="btn btn-answer">显示答案</button>
                 </div>
             </div>
 
             <div class="panel">
-                <div class="panel-title" data-i18n="jump">跳转</div>
+                <div class="panel-title">跳转</div>
                 <div class="jump-row">
-                    <input id="jumpInput" class="jump-input" type="number" min="1" data-i18n-placeholder="jumpPlaceholder">
-                    <button id="jumpBtn" class="jump-btn" data-i18n="go">前往</button>
+                    <input id="jumpInput" class="jump-input" type="number" min="1" placeholder="输入题号">
+                    <button id="jumpBtn" class="jump-btn">前往</button>
                 </div>
             </div>
 
             <div class="panel info-panel">
-                <div class="panel-title" data-i18n="info">题目信息</div>
+                <div class="panel-title">题目信息</div>
                 <div class="info-sep"></div>
-                <div class="info-row"><span class="info-label" data-i18n="infoNumber">题号</span><span id="infoNumber" class="info-value">-</span></div>
-                <div class="info-row"><span class="info-label" data-i18n="nextMove">下一手</span><span id="turnInfo" class="info-value" data-i18n-value="black">黑棋</span></div>
+                <div class="info-row"><span class="info-label">题号</span><span id="infoNumber" class="info-value">-</span></div>
+                <div class="info-row"><span class="info-label">下一手</span><span id="turnInfo" class="info-value">黑棋</span></div>
             </div>
         </div>
     </div>
 
-    <footer data-i18n="footer">绝艺的一手</footer>
+    <footer>绝艺的一手</footer>
 
     <script>
-        const i18n = {
-            zh: {
-                title: '绝艺的一手',
-                subtitle: '围棋妙手精选',
-                loading: '正在加载...',
-                nav: '导航',
-                prev: '上一个',
-                next: '下一个',
-                random: '随机一题',
-                ops: '操作',
-                clear: '清除',
-                showAnswer: '显示答案',
-                hideAnswer: '隐藏答案',
-                jump: '跳转',
-                jumpPlaceholder: '输入题号',
-                go: '前往',
-                info: '题目信息',
-                infoNumber: '题号',
-                nextMove: '下一手',
-                black: '黑棋',
-                white: '白棋',
-                footer: '绝艺的一手',
-                loadError: '加载失败'
-            },
-            ja: {
-                title: '絶芸の一手',
-                subtitle: '囲碁妙手選',
-                loading: '読み込み中...',
-                nav: 'ナビゲーション',
-                prev: '前へ',
-                next: '次へ',
-                random: 'ランダム出題',
-                ops: '操作',
-                clear: 'クリア',
-                showAnswer: '答えを見る',
-                hideAnswer: '答えを隠す',
-                jump: '問題指定',
-                jumpPlaceholder: '問題番号',
-                go: '移動',
-                info: '問題情報',
-                infoNumber: '問題番号',
-                nextMove: '次の手',
-                black: '黒番',
-                white: '白番',
-                footer: '絶芸の一手',
-                loadError: '読み込み失敗'
-            }
-        };
-
-        let lang = localStorage.getItem('lang') || 'zh';
-
-        function applyLang() {
-            const t = i18n[lang];
-            document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'ja';
-            document.getElementById('langBtn').textContent = lang === 'zh' ? '日本語' : '中文';
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if (t[key]) el.textContent = t[key];
-            });
-            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-                const key = el.getAttribute('data-i18n-placeholder');
-                if (t[key]) el.placeholder = t[key];
-            });
-            if (answerBtn.dataset.active === 'true') {
-                answerBtn.textContent = t.hideAnswer;
-            } else {
-                answerBtn.textContent = t.showAnswer;
-            }
-            if (turnInfo.dataset.value) {
-                turnInfo.textContent = t[turnInfo.dataset.value] || turnInfo.dataset.value;
-            }
-            document.title = t.title + ' - ' + (lang === 'zh' ? '围棋棋谱浏览' : '囲碁棋譜閲覧');
-        }
-
-        document.getElementById('langBtn').addEventListener('click', () => {
-            lang = lang === 'zh' ? 'ja' : 'zh';
-            localStorage.setItem('lang', lang);
-            applyLang();
-        });
-
         let sgfFiles = [];
         let currentIndex = -1;
         let board = null;
@@ -600,7 +504,6 @@
                 answerMove = null;
                 turnInfo.dataset.value = 'black';
             }
-            applyLang();
 
             board = new WGo.Board(boardElem, {
                 size: size,
@@ -627,7 +530,6 @@
                 if (showAnswer) {
                     showAnswer = false;
                     answerBtn.dataset.active = 'false';
-                    applyLang();
                 }
 
                 trialCount++;
@@ -701,7 +603,7 @@
             if (!showAnswer) clearTrial();
             showAnswer = !showAnswer;
             answerBtn.dataset.active = showAnswer ? 'true' : 'false';
-            applyLang();
+            answerBtn.textContent = showAnswer ? '隐藏答案' : '显示答案';
             syncBoard();
         });
 
@@ -747,7 +649,6 @@
         }
 
         async function init() {
-            applyLang();
             try {
                 const resp = await fetch('data/manifest.json');
                 if (resp.ok) {
@@ -791,8 +692,7 @@
                 if (sgfContent) {
                     loadSGF(sgfContent);
                 } else {
-                    const t = i18n[lang];
-                    boardElem.innerHTML = '<div class="error">' + t.loadError + '</div>';
+                    boardElem.innerHTML = '<div class="error">加载失败</div>';
                 }
             } else {
                 const xhr = new XMLHttpRequest();
@@ -801,8 +701,7 @@
                     if (xhr.readyState === 4) {
                         if (xhr.status === 200) loadSGF(xhr.responseText);
                         else {
-                            const t = i18n[lang];
-                            boardElem.innerHTML = '<div class="error">' + t.loadError + '</div>';
+                            boardElem.innerHTML = '<div class="error">加载失败</div>';
                         }
                     }
                 };

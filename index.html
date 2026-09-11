@@ -9,110 +9,231 @@
 
         body {
             font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #e8eaf6 0%, #c5cae9 30%, #b3c4e8 60%, #d1c4e9 100%);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             color: #333;
+            overflow: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                linear-gradient(rgba(100,100,120,0.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(100,100,120,0.06) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+        }
+
+        body::after {
+            content: '';
+            position: absolute;
+            top: -15%;
+            right: -5%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
         }
 
         .container {
             text-align: center;
             padding: 40px 20px;
+            position: relative;
+            z-index: 1;
         }
 
         h1 {
-            font-size: 2.5em;
-            color: #fff;
-            margin-bottom: 10px;
-            letter-spacing: 4px;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            font-size: 2.8em;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 12px;
+            letter-spacing: 6px;
+            text-shadow: 0 2px 10px rgba(255,255,255,0.8);
         }
 
         .subtitle {
             font-size: 1.1em;
-            color: rgba(255,255,255,0.85);
-            margin-bottom: 50px;
-            letter-spacing: 2px;
+            font-weight: 400;
+            color: #5a6a7a;
+            margin-bottom: 60px;
+            letter-spacing: 3px;
         }
 
         .cards {
             display: flex;
-            gap: 30px;
+            gap: 40px;
             justify-content: center;
             flex-wrap: wrap;
         }
 
         .card {
-            background: #fff;
-            border-radius: 12px;
-            padding: 40px 30px;
-            width: 320px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.65);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.8);
+            border-radius: 16px;
+            padding: 48px 36px 40px;
+            width: 340px;
+            box-shadow:
+                0 8px 32px rgba(100,100,140,0.12),
+                inset 0 1px 0 rgba(255,255,255,0.9);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             cursor: pointer;
             text-decoration: none;
             color: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 16px;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.3) 50%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
         }
 
         .card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+            transform: translateY(-12px) scale(1.02);
+            background: rgba(255,255,255,0.85);
+            box-shadow:
+                0 20px 60px rgba(100,100,140,0.2),
+                0 0 40px rgba(149, 128, 192, 0.15),
+                inset 0 1px 0 rgba(255,255,255,1);
         }
 
         .card-icon {
-            font-size: 48px;
-            margin-bottom: 20px;
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .card-jueyi .card-icon {
+            background: linear-gradient(135deg, rgba(149, 128, 192, 0.25), rgba(129, 140, 248, 0.25));
+        }
+
+        .card-guanzi .card-icon {
+            background: linear-gradient(135deg, rgba(104, 159, 124, 0.25), rgba(72, 187, 120, 0.25));
+        }
+
+        .card-icon svg {
+            width: 36px;
+            height: 36px;
+        }
+
+        .card-jueyi .card-icon svg {
+            fill: #7c6ba3;
+        }
+
+        .card-guanzi .card-icon svg {
+            fill: #48a870;
         }
 
         .card-title {
-            font-size: 1.4em;
+            font-size: 1.5em;
             font-weight: 600;
-            color: #2c2c2c;
-            margin-bottom: 12px;
-            letter-spacing: 2px;
+            color: #2c3e50;
+            margin-bottom: 14px;
+            letter-spacing: 3px;
         }
 
         .card-desc {
             font-size: 0.95em;
-            color: #666;
-            line-height: 1.6;
-            margin-bottom: 20px;
+            font-weight: 400;
+            color: #5a6a7a;
+            line-height: 1.7;
+            margin-bottom: 24px;
+            min-height: 50px;
         }
 
-        .card-tag {
-            display: inline-block;
-            padding: 6px 16px;
-            background: #f0f2f5;
-            border-radius: 20px;
+        .card-meta {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
             font-size: 0.85em;
-            color: #666;
+            color: #8896a6;
         }
 
-        .card-jueyi .card-tag {
-            background: #e8f4fd;
-            color: #1a73e8;
+        .card-meta svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+            opacity: 0.8;
         }
 
-        .card-guanzi .card-tag {
-            background: #e8f8e8;
-            color: #2d8a4e;
+        .card-arrow {
+            position: absolute;
+            bottom: 20px;
+            right: 24px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(100,120,140,0.1);
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .card-arrow svg {
+            width: 16px;
+            height: 16px;
+            fill: #5a6a7a;
+        }
+
+        .card:hover .card-arrow {
+            opacity: 1;
+            transform: translateX(0);
         }
 
         footer {
-            margin-top: 50px;
-            color: rgba(255,255,255,0.7);
-            font-size: 0.9em;
-            letter-spacing: 1px;
+            margin-top: 60px;
+            color: #8896a6;
+            font-size: 0.85em;
+            letter-spacing: 2px;
+            position: relative;
+            z-index: 1;
         }
 
         @media (max-width: 720px) {
-            h1 { font-size: 1.8em; }
-            .subtitle { font-size: 1em; margin-bottom: 30px; }
-            .cards { flex-direction: column; align-items: center; gap: 20px; }
-            .card { width: 100%; max-width: 320px; padding: 30px 20px; }
+            h1 { font-size: 2em; letter-spacing: 4px; }
+            .subtitle { font-size: 0.95em; margin-bottom: 40px; }
+            .cards { flex-direction: column; align-items: center; gap: 24px; }
+            .card { width: 100%; max-width: 340px; padding: 40px 28px 36px; }
+        }
+
+        @media (max-width: 380px) {
+            h1 { font-size: 1.6em; }
+            .card { padding: 32px 20px 28px; }
+            .card-title { font-size: 1.3em; }
         }
     </style>
 </head>
@@ -123,17 +244,43 @@
 
         <div class="cards">
             <a href="jueyi/" class="card card-jueyi">
-                <div class="card-icon">🎯</div>
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
+                        <circle cx="12" cy="12" r="6" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+                        <circle cx="12" cy="12" r="2.5"/>
+                    </svg>
+                </div>
                 <div class="card-title">绝艺的一手</div>
                 <div class="card-desc">围棋妙手精选，欣赏高手的精彩着法，学习实战中的精妙手筋</div>
-                <span class="card-tag">1834 道题目</span>
+                <div class="card-meta">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                    <span>1834 道题目</span>
+                </div>
+                <div class="card-arrow">
+                    <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
             </a>
 
             <a href="guanzi/" class="card card-guanzi">
-                <div class="card-icon">🧮</div>
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="3" y="3" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
+                        <rect x="7" y="7" width="4" height="4" rx="1"/>
+                        <rect x="13" y="7" width="4" height="4" rx="1"/>
+                        <rect x="7" y="13" width="4" height="4" rx="1"/>
+                        <rect x="13" y="13" width="4" height="4" rx="1"/>
+                    </svg>
+                </div>
                 <div class="card-title">官子练习</div>
                 <div class="card-desc">官子目数计算训练，提升终盘收官能力，支持测试模式</div>
-                <span class="card-tag">233 道题目</span>
+                <div class="card-meta">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                    <span>233 道题目</span>
+                </div>
+                <div class="card-arrow">
+                    <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
             </a>
         </div>
     </div>
