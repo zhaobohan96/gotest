@@ -660,7 +660,7 @@
                             sgfFiles.push(n + '.sgf');
                         }
                     }
-                    loadChunk(0);
+                    manifest.chunks.forEach((_, i) => loadChunk(i));
                 } else {
                     throw new Error('no manifest');
                 }
