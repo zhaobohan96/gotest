@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>围棋官子练习 - 单元测试</title>
+    <style>
+        body { font-family: monospace; margin: 20px; background: #f5f5f5; }
+        h1 { font-size: 18px; }
+        .test-suite { margin: 10px 0; padding: 10px; background: #fff; border: 1px solid #ddd; }
+        .test-suite h2 { font-size: 14px; margin: 0 0 10px 0; }
+        .test { margin: 5px 0; padding: 5px 10px; }
+        .pass { background: #d4edda; }
+        .fail { background: #f8d7da; }
+        .summary { margin-top: 20px; padding: 10px; font-weight: bold; }
+        .summary.all-pass { background: #d4edda; }
+        .summary.has-fail { background: #f8d7da; }
+    </style>
+</head>
+<body>
+    <h1>围棋官子练习 - 单元测试</h1>
+    <div id="results"></div>
+    <div id="summary" class="summary"></div>
+
+    <script>
+        // ========== 测试框架 ==========
+        let totalTests = 0;
+        let passedTests = 0;
+        let failedTests = 0;
+        const results = document.getElementById('results');
+        const summaryEl = document.getElementById('summary');
+
+        function describe(suiteName, fn) {
+            const suite = document.createElement('div');
+            suite.className = 'test-suite';
+            suite.innerHTML = `<h2>${suiteName}</h2>`;
+            results.appendChild(suite);
+            fn(suite);
+        }
+
+        function it(testName, fn) {
+            totalTests++;
+            try {
+                fn();
+                passedTests++;
+                appendResult(true, testName);
+            } catch (e) {
+                failedTests++;
+                appendResult(false, testName, e.message);
+            }
+        }
+
+        function appendResult(pass, name, error) {
+            const div = document.createElement('div');
+            div.className = 'test ' + (pass ? 'pass' : 'fail');
+            div.textContent = (pass ? '✓ ' : '✗ ') + name + (error ? ' - ' + error : '');
+            results.lastChild.appendChild(div);
+        }
+
+        function assert(condition, msg) {
+            if (!condition) throw new Error(msg || 'Assertion failed');
+        }
+
+        function assertEqual(actual, expected, msg) {
+            if (actual !== expected) {
+                throw new Error(msg || `Expected ${expected}, got ${actual}`);
+            }
+        }
+
+        function assertApprox(actual, expected, tolerance, msg) {
+            if (Math.abs(actual - expected) >= (tolerance || 0.001)) {
+                throw new Error(msg || `Expected ~${expected}, got ${actual}`);
+            }
+        }
+
+        // ========== 被测函数（从 index.html 提取） ==========
+
+        function parseAnswerValue(str) {
+            str = str.trim();
+            const intMatch = str.match(/^(\d+)$/);
+            if (intMatch) return parseInt(intMatch[1]);
+            const mixedMatch = str.match(/^(\d+)又(\d+)\/(\d+)$/);
+            if (mixedMatch) return parseInt(mixedMatch[1]) + parseInt(mixedMatch[2]) / parseInt(mixedMatch[3]);
+            return null;
+        }
+
+        function formatAnswer(value) {
+            if (value === null) return '-';
+            if (typeof value === 'string') return value;
+            if (Number.isInteger(value)) return value.toString();
+            for (let d = 2; d <= 12; d++) {
+                const num = value * d;
+                if (Math.abs(num - Math.round(num)) < 0.0001) {
+                    const n = Math.round(num);
+                    if (n === d) return '1';
+                    if (n % d === 0) return (n / d).toString();
+                    return simplifyFraction(n, d);
+                }
+            }
+            return '-';
+        }
+
+        function simplifyFraction(num, den) {
+            const g = gcd(Math.abs(num), den);
+            num /= g;
+            den /= g;
+            if (den === 1) return num.toString();
+            return num + '/' + den;
+        }
+
+        function gcd(a, b) {
+            a = Math.abs(a);
+            b = Math.abs(b);
+            while (b) {
+                [a, b] = [b, a % b];
+            }
+            return a;
+        }
+
+        function parseSGFProperty(content, propName) {
+            const results = [];
+            const propRegex = new RegExp(propName + '\\s*(?=\\[)', 'g');
+            let propMatch;
+            while ((propMatch = propRegex.exec(content)) !== null) {
+                let i = propMatch.index + propName.length;
+                while (i < content.length) {
+                    while (i < content.length && (content[i] === ' ' || content[i] === '\r' || content[i] === '\n' || content[i] === '\t')) i++;
+                    if (content[i] !== '[') break;
+                    i++;
+                    let value = '';
+                    while (i < content.length && content[i] !== ']') { value += content[i]; i++; }
+                    if (value) results.push(value);
+                    i++;
+                }
+            }
+            return results;
+        }
+
+        function shuffleArray(arr) {
+            const a = [...arr];
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        // ========== 测试用例 ==========
+
+        describe('parseAnswerValue - 解析答案字符串', () => {
+            it('解析整数', () => {
+                assertEqual(parseAnswerValue('2'), 2);
+            });
+
+            it('解析零', () => {
+                assertEqual(parseAnswerValue('0'), 0);
+            });
+
+            it('解析大整数', () => {
+                assertEqual(parseAnswerValue('100'), 100);
+            });
+
+            it('解析带分数 2又1/3', () => {
+                assertApprox(parseAnswerValue('2又1/3'), 2 + 1/3);
+            });
+
+            it('解析带分数 7又5/6', () => {
+                assertApprox(parseAnswerValue('7又5/6'), 7 + 5/6);
+            });
+
+            it('解析带分数 1又1/2', () => {
+                assertApprox(parseAnswerValue('1又1/2'), 1.5);
+            });
+
+            it('解析带分数 10又17/24', () => {
+                assertApprox(parseAnswerValue('10又17/24'), 10 + 17/24);
+            });
+
+            it('解析带空格的输入', () => {
+                assertEqual(parseAnswerValue(' 2 '), 2);
+            });
+
+            it('无效格式返回null - 小数', () => {
+                assertEqual(parseAnswerValue('2.5'), null);
+            });
+
+            it('无效格式返回null - 假分数', () => {
+                assertEqual(parseAnswerValue('7/3'), null);
+            });
+
+            it('无效格式返回null - 空字符串', () => {
+                assertEqual(parseAnswerValue(''), null);
+            });
+
+            it('无效格式返回null - 文字', () => {
+                assertEqual(parseAnswerValue('abc'), null);
+            });
+        });
+
+        describe('formatAnswer - 格式化答案显示', () => {
+            it('null 返回 -', () => {
+                assertEqual(formatAnswer(null), '-');
+            });
+
+            it('整数直接返回', () => {
+                assertEqual(formatAnswer(2), '2');
+                assertEqual(formatAnswer(10), '10');
+            });
+
+            it('字符串直接返回', () => {
+                assertEqual(formatAnswer('2又1/3'), '2又1/3');
+            });
+
+            it('0.5 返回 1/2', () => {
+                assertEqual(formatAnswer(0.5), '1/2');
+            });
+
+            it('1.5 返回 3/2', () => {
+                assertEqual(formatAnswer(1.5), '3/2');
+            });
+
+            it('2.25 返回 9/4', () => {
+                assertEqual(formatAnswer(2.25), '9/4');
+            });
+        });
+
+        describe('gcd - 最大公约数', () => {
+            it('gcd(12, 8) = 4', () => {
+                assertEqual(gcd(12, 8), 4);
+            });
+
+            it('gcd(7, 5) = 1', () => {
+                assertEqual(gcd(7, 5), 1);
+            });
+
+            it('gcd(100, 25) = 25', () => {
+                assertEqual(gcd(100, 25), 25);
+            });
+
+            it('gcd(0, 5) = 5', () => {
+                assertEqual(gcd(0, 5), 5);
+            });
+        });
+
+        describe('simplifyFraction - 约分', () => {
+            it('2/4 -> 1/2', () => {
+                assertEqual(simplifyFraction(2, 4), '1/2');
+            });
+
+            it('6/3 -> 2', () => {
+                assertEqual(simplifyFraction(6, 3), '2');
+            });
+
+            it('5/7 -> 5/7', () => {
+                assertEqual(simplifyFraction(5, 7), '5/7');
+            });
+        });
+
+        describe('parseSGFProperty - 解析SGF属性', () => {
+            it('解析单个 AB 属性', () => {
+                const sgf = '(;GM[1]SZ[19]AB[cd][ef])';
+                const result = parseSGFProperty(sgf, 'AB');
+                assertEqual(result.length, 2);
+                assertEqual(result[0], 'cd');
+                assertEqual(result[1], 'ef');
+            });
+
+            it('解析多个 AB 属性', () => {
+                const sgf = '(;AB[cd][ef]AB[gh])';
+                const result = parseSGFProperty(sgf, 'AB');
+                assertEqual(result.length, 3);
+            });
+
+            it('无属性返回空数组', () => {
+                const sgf = '(;GM[1]SZ[19])';
+                const result = parseSGFProperty(sgf, 'AB');
+                assertEqual(result.length, 0);
+            });
+
+            it('解析 TR 属性', () => {
+                const sgf = '(;TR[ab][cd])';
+                const result = parseSGFProperty(sgf, 'TR');
+                assertEqual(result.length, 2);
+            });
+
+            it('解析 AW 属性', () => {
+                const sgf = '(;AW[de][fg])';
+                const result = parseSGFProperty(sgf, 'AW');
+                assertEqual(result.length, 2);
+            });
+        });
+
+        describe('shuffleArray - 数组打乱', () => {
+            it('返回新数组不修改原数组', () => {
+                const original = [1, 2, 3, 4, 5];
+                const originalCopy = [...original];
+                shuffleArray(original);
+                assertEqual(JSON.stringify(original), JSON.stringify(originalCopy));
+            });
+
+            it('长度不变', () => {
+                const arr = [1, 2, 3, 4, 5];
+                const shuffled = shuffleArray(arr);
+                assertEqual(shuffled.length, arr.length);
+            });
+
+            it('包含相同元素', () => {
+                const arr = [1, 2, 3, 4, 5];
+                const shuffled = shuffleArray(arr);
+                assertEqual(JSON.stringify(shuffled.sort()), JSON.stringify(arr.sort()));
+            });
+        });
+
+        // ========== 答案验证逻辑测试 ==========
+
+        describe('答案验证逻辑', () => {
+            it('数值和属性都匹配时正确', () => {
+                const answerValue = 6;
+                const answerProperty = 'gote';
+                const userAnswer = 6;
+                const selectedProperty = 'gote';
+                const tolerance = 0.001;
+
+                const isCorrect = Math.abs(userAnswer - answerValue) < tolerance && selectedProperty === answerProperty;
+                assertEqual(isCorrect, true);
+            });
+
+            it('数值匹配但属性不匹配时错误', () => {
+                const answerValue = 6;
+                const answerProperty = 'gote';
+                const userAnswer = 6;
+                const selectedProperty = 'sente';
+                const tolerance = 0.001;
+
+                const isCorrect = Math.abs(userAnswer - answerValue) < tolerance && selectedProperty === answerProperty;
+                assertEqual(isCorrect, false);
+            });
+
+            it('数值不匹配时错误', () => {
+                const answerValue = 6;
+                const answerProperty = 'gote';
+                const userAnswer = 7;
+                const selectedProperty = 'gote';
+                const tolerance = 0.001;
+
+                const isCorrect = Math.abs(userAnswer - answerValue) < tolerance && selectedProperty === answerProperty;
+                assertEqual(isCorrect, false);
+            });
+
+            it('容差范围内数值匹配', () => {
+                const answerValue = 2.333;
+                const userAnswer = 2.334;
+                const tolerance = 0.001;
+
+                assertEqual(Math.abs(userAnswer - answerValue) < tolerance, true);
+            });
+
+            it('容差范围外数值不匹配', () => {
+                const answerValue = 2.333;
+                const userAnswer = 2.34;
+                const tolerance = 0.001;
+
+                assertEqual(Math.abs(userAnswer - answerValue) < tolerance, false);
+            });
+
+            it('字符串答案精确匹配', () => {
+                const answerValue = '2又1/3';
+                const userAnswer = '2又1/3';
+                assertEqual(userAnswer === answerValue, true);
+            });
+
+            it('字符串答案不匹配', () => {
+                const answerValue = '2又1/3';
+                const userAnswer = '2又2/3';
+                assertEqual(userAnswer === answerValue, false);
+            });
+        });
+
+        // ========== 属性映射测试 ==========
+
+        describe('属性映射', () => {
+            it('sente -> 先手', () => {
+                const propertyMap = { 'sente': '先手', 'gote': '后手', 'reverse': '逆收' };
+                assertEqual(propertyMap['sente'], '先手');
+            });
+
+            it('gote -> 后手', () => {
+                const propertyMap = { 'sente': '先手', 'gote': '后手', 'reverse': '逆收' };
+                assertEqual(propertyMap['gote'], '后手');
+            });
+
+            it('reverse -> 逆收', () => {
+                const propertyMap = { 'sente': '先手', 'gote': '后手', 'reverse': '逆收' };
+                assertEqual(propertyMap['reverse'], '逆收');
+            });
+        });
+
+        // ========== 先手方映射测试 ==========
+
+        describe('先手方映射', () => {
+            it('b -> 黑先', () => {
+                const turnMap = { 'b': '黑先', 'w': '白先' };
+                assertEqual(turnMap['b'], '黑先');
+            });
+
+            it('w -> 白先', () => {
+                const turnMap = { 'b': '黑先', 'w': '白先' };
+                assertEqual(turnMap['w'], '白先');
+            });
+
+            it('默认黑先', () => {
+                const turnMap = { 'b': '黑先', 'w': '白先' };
+                assertEqual(turnMap[undefined] || '黑先', '黑先');
+            });
+        });
+
+        // ========== 难度映射测试 ==========
+
+        describe('难度映射', () => {
+            const difficultyMap = { beginner: '初级', intermediate: '中级', advanced: '高级' };
+
+            it('beginner -> 初级', () => {
+                assertEqual(difficultyMap['beginner'], '初级');
+            });
+
+            it('intermediate -> 中级', () => {
+                assertEqual(difficultyMap['intermediate'], '中级');
+            });
+
+            it('advanced -> 高级', () => {
+                assertEqual(difficultyMap['advanced'], '高级');
+            });
+        });
+
+        // ========== 输出结果 ==========
+
+        summaryEl.textContent = `测试完成: ${passedTests}/${totalTests} 通过, ${failedTests} 失败`;
+        summaryEl.className = 'summary ' + (failedTests === 0 ? 'all-pass' : 'has-fail');
+    </script>
+</body>
+</html>

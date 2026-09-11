@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>围棋官子练习</title>
+    <script type="text/javascript" src="wgo.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            background: #eef0f2;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        header {
+            position: relative;
+            padding: 14px 20px 10px;
+            background: #fff;
+            border-bottom: 1px solid #dde0e4;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            text-align: left;
+            position: relative;
+        }
+
+        .home-link {
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 4px 10px;
+            font-size: 12px;
+            color: #666;
+            text-decoration: none;
+            border: 1px solid #d0d3d7;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+        }
+        .home-link:hover { background: #f5f6f7; border-color: #b0b4b8; color: #444; }
+
+        .header-right {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #2c2c2c;
+            letter-spacing: 3px;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: #999;
+            margin-top: 2px;
+            letter-spacing: 1px;
+        }
+
+        .header-right {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .mode-toggle {
+            display: flex;
+            border: 1px solid #d0d3d7;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .mode-btn {
+            padding: 4px 10px;
+            font-size: 12px;
+            border: none;
+            background: #fff;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .mode-btn:first-child { border-right: 1px solid #d0d3d7; }
+        .mode-btn:hover { background: #f5f6f7; }
+        .mode-btn.active { background: #3a4a5c; color: #fff; }
+
+        .difficulty-toggle {
+            display: flex;
+            gap: 4px;
+        }
+
+        .diff-btn {
+            padding: 4px 10px;
+            font-size: 12px;
+            border: 1px solid #d0d3d7;
+            border-radius: 4px;
+            background: #fff;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .diff-btn:hover { background: #f5f6f7; border-color: #b0b4b8; }
+        .diff-btn.active { background: #3a4a5c; color: #fff; border-color: #3a4a5c; }
+        .diff-btn:disabled { opacity: 0.5; cursor: not-allowed; background: #f5f6f7; }
+
+        .progress-bar {
+            background: #fff;
+            border-bottom: 1px solid #dde0e4;
+            padding: 8px 0;
+        }
+
+        .progress-inner {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .progress-label {
+            font-size: 14px;
+            color: #999;
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .progress-label .cur {
+            font-weight: 600;
+            color: #3a4a5c;
+        }
+
+        .progress-track {
+            flex: 1;
+            height: 7px;
+            background: #f0f1f3;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #3a4a5c;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .page {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            padding: 20px 28px 36px;
+            max-width: 1080px;
+            margin: 0 auto;
+        }
+
+        .board-wrap {
+            flex-shrink: 0;
+            background: #fff;
+            border-radius: 6px;
+            padding: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            border: 1px solid #d0d3d7;
+        }
+
+        .board-inner {
+            background: #fafbfc;
+            border-radius: 4px;
+            padding: 14px 18px 18px 20px;
+        }
+
+        #board { width: 640px; height: 640px; }
+
+        .side {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 240px;
+            flex-shrink: 0;
+        }
+
+        .panel {
+            background: #fff;
+            border-radius: 4px;
+            border: 1px solid #dde0e4;
+            padding: 12px 16px;
+        }
+
+        .panel-title {
+            font-size: 13px;
+            color: #666;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .nav-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 4px;
+            margin-top: 8px;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 0;
+            padding: 7px 8px;
+            font-size: 13px;
+            border: 1px solid #d0d3d7;
+            border-radius: 4px;
+            outline: none;
+            color: #555;
+        }
+        .search-input:focus { border-color: #3a4a5c; }
+        .search-input::placeholder { color: #b0b4b8; }
+
+        .search-btn {
+            padding: 7px 8px;
+            font-size: 13px;
+            border: 1px solid #d0d3d7;
+            border-radius: 4px;
+            background: #fff;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .search-btn:hover { background: #f5f6f7; border-color: #b0b4b8; }
+
+        .btn {
+            padding: 9px 0;
+            font-size: 13px;
+            font-weight: 500;
+            border: 1px solid #d0d3d7;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            background: #fff;
+            color: #666;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            text-align: center;
+        }
+
+        .btn:hover:not(:disabled) { background: #f5f6f7; border-color: #b0b4b8; color: #444; }
+        .btn:active:not(:disabled) { background: #e8eaec; }
+        .btn:disabled { background: #fafafa; color: #a0a4a8; border-color: #dde0e4; cursor: not-allowed; opacity: 0.5; }
+        .btn-full { grid-column: 1 / -1; }
+
+        .btn-dark {
+            background: #3a4a5c;
+            color: #fff;
+            border-color: #3a4a5c;
+        }
+        .btn-dark:hover:not(:disabled) { background: #4a5a6c; border-color: #4a5a6c; color: #fff; }
+
+        .info-panel .info-sep { height: 1px; background: #dde0e4; margin: 0 -4px 8px; }
+        .info-row { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; }
+        .info-label { font-size: 13px; color: #999; }
+        .info-value { font-size: 13px; color: #333; font-weight: 500; }
+
+        .answer-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .answer-input-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .answer-input {
+            flex: 1;
+            padding: 8px 10px;
+            font-size: 14px;
+            border: 1px solid #d0d3d7;
+            border-radius: 4px;
+            outline: none;
+            color: #555;
+        }
+        .answer-input:focus { border-color: #3a4a5c; }
+        .answer-input::placeholder { color: #b0b4b8; font-size: 12px; }
+
+        .answer-unit {
+            color: #666;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .property-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .property-label {
+            color: #666;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .property-options {
+            display: flex;
+            gap: 12px;
+        }
+
+        .property-option {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 13px;
+            color: #666;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        .property-option.active {
+            color: #3a4a5c;
+            font-weight: 500;
+            border-color: #3a4a5c;
+            background: #eef0f2;
+        }
+
+        .property-text {
+            font-size: 13px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 8px 0;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid #3a4a5c;
+            border-radius: 4px;
+            background: #3a4a5c;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        .submit-btn:hover { background: #4a5a6c; border-color: #4a5a6c; }
+
+        .answer-hint {
+            font-size: 11px;
+            color: #b0b4b8;
+            line-height: 1.4;
+            white-space: nowrap;
+        }
+
+        .feedback {
+            margin-top: 8px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        .feedback.correct { color: #2d8a4e; }
+        .feedback.wrong { color: #c44; }
+        .feedback.hint { color: #8b6914; }
+
+        .op-row {
+            display: flex;
+            gap: 8px;
+        }
+        .op-row .btn { flex: 1; }
+
+        .btn-answer {
+            background: #e8eef4;
+            border-color: #3a4a5c;
+            color: #3a4a5c;
+        }
+        .btn-answer:hover { background: #dce4ed; }
+
+        footer {
+            text-align: center;
+            padding: 12px 0;
+            color: #b0b4b8;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+        .loading, .error {
+            display: flex; align-items: center; justify-content: center;
+            width: 100%; aspect-ratio: 1 / 1;
+            color: #bbb; font-size: 15px;
+        }
+        .error { color: #c44; }
+
+        .test-start-panel {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .test-start-panel .panel-title {
+            margin-bottom: 16px;
+        }
+
+        .test-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .test-option {
+            padding: 10px;
+            border: 1px solid #d0d3d7;
+            border-radius: 4px;
+            background: #fff;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .test-option:hover { background: #f5f6f7; border-color: #b0b4b8; }
+        .test-option.selected { background: #e8eef4; border-color: #3a4a5c; }
+
+        .test-option-num {
+            font-size: 18px;
+            font-weight: 600;
+            color: #3a4a5c;
+        }
+
+        .test-option-label {
+            font-size: 12px;
+            color: #999;
+            margin-top: 2px;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show { display: flex; }
+
+        .modal {
+            background: #fff;
+            border-radius: 8px;
+            padding: 32px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .modal-stats {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-bottom: 24px;
+        }
+
+        .modal-stat {
+            text-align: center;
+        }
+
+        .modal-stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #3a4a5c;
+        }
+
+        .modal-stat-value.correct { color: #2d8a4e; }
+        .modal-stat-value.wrong { color: #c44; }
+
+        .modal-stat-label {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        .modal-accuracy {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 24px;
+        }
+
+        .modal-accuracy strong {
+            font-size: 24px;
+            color: #3a4a5c;
+        }
+
+        .modal-btn {
+            padding: 10px 24px;
+            font-size: 14px;
+            border: 1px solid #3a4a5c;
+            border-radius: 4px;
+            background: #3a4a5c;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .modal-btn:hover { background: #4a5a6c; }
+
+        .test-progress-info {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 4px;
+        }
+
+        .test-progress-info strong {
+            color: #3a4a5c;
+        }
+
+        @media (max-width: 960px) {
+            .page {
+                flex-direction: column;
+                align-items: center;
+                padding: 16px 12px 32px;
+                gap: 16px;
+            }
+            #board { width: min(640px, calc(100vw - 72px)); height: min(640px, calc(100vw - 72px)); }
+            .side { width: 100%; max-width: 640px; flex-direction: row; flex-wrap: wrap; gap: 10px; }
+            .side .panel { flex: 1; min-width: 160px; }
+        }
+
+        @media (max-width: 640px) {
+            header { padding: 10px 12px 8px; text-align: left; }
+            .subtitle { display: none; }
+            h1 { font-size: 1em; letter-spacing: 1px; }
+            
+            .header-right {
+                position: static;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+                margin-top: 8px;
+            }
+            .mode-toggle { display: flex; }
+            .difficulty-toggle { display: flex; gap: 4px; }
+            .mode-btn { padding: 4px 8px; font-size: 11px; }
+            .diff-btn { padding: 4px 8px; font-size: 11px; }
+
+            .progress-bar { padding: 6px 0; }
+            .progress-inner { padding: 0 16px; gap: 10px; }
+            .progress-label { font-size: 12px; }
+            .progress-track { height: 6px; }
+
+            .page { padding: 12px 10px 24px; gap: 12px; }
+
+            .board-wrap { padding: 8px; border-radius: 4px; width: 100%; }
+            .board-inner { padding: 8px 10px 10px 12px; border-radius: 3px; }
+            #board { width: 100% !important; height: auto !important; aspect-ratio: 1 / 1; }
+
+            .side { gap: 8px; flex-direction: column; }
+            .side .panel { min-width: 100%; }
+            .panel { padding: 10px 12px; }
+            .panel-title { font-size: 12px; margin-bottom: 6px; }
+
+            .nav-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+            .search-row { margin-top: 6px; }
+            .search-input { padding: 6px 8px; font-size: 12px; }
+            .search-btn { padding: 6px 8px; font-size: 12px; }
+
+            .btn { padding: 8px 0; font-size: 12px; }
+
+            .answer-group { gap: 10px; }
+            .answer-input-wrap { width: 100%; }
+            .answer-input { padding: 10px; font-size: 16px; min-height: 44px; }
+            .answer-unit { font-size: 14px; }
+            
+            .property-group { 
+                flex-wrap: wrap; 
+                gap: 6px;
+            }
+            .property-label { font-size: 12px; }
+            .property-options { gap: 10px; }
+            .property-option { padding: 4px 0; }
+            .property-text { font-size: 13px; }
+            
+            .submit-btn { padding: 12px 0; font-size: 15px; min-height: 44px; }
+            .answer-hint { font-size: 11px; }
+
+            .info-panel .info-row { padding: 3px 0; }
+            .info-label, .info-value { font-size: 11px; }
+        }
+
+        @media (max-width: 380px) {
+            header { padding: 8px 10px 6px; }
+            h1 { font-size: 0.9em; }
+            .mode-btn, .diff-btn { padding: 3px 6px; font-size: 10px; }
+            .panel { padding: 8px 10px; }
+            .btn { padding: 7px 0; font-size: 11px; }
+            .answer-input { padding: 6px; font-size: 12px; }
+            .submit-btn { padding: 7px 0; font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="header-left">
+                <a href="../" class="home-link" title="返回首页">← 首页</a>
+                <h1>围棋官子练习</h1>
+                <p class="subtitle">官子目数计算训练</p>
+            </div>
+            <div class="header-right">
+            <div class="mode-toggle">
+                <button class="mode-btn active" data-mode="free">自由练习</button>
+                <button class="mode-btn" data-mode="test">测试模式</button>
+            </div>
+            <div id="difficultyToggle" class="difficulty-toggle">
+                <button class="diff-btn active" data-diff="beginner">初级</button>
+                <button class="diff-btn" data-diff="intermediate">中级</button>
+                <button class="diff-btn" data-diff="advanced">高级</button>
+            </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="progress-bar" id="progressBar">
+        <div class="progress-inner">
+            <span class="progress-label" id="progressLeft"><span id="currentProblem" class="cur">-</span> / <span id="problemCount">-</span></span>
+            <div class="progress-track">
+                <div id="progressFill" class="progress-fill" style="width:0%"></div>
+            </div>
+            <span class="progress-label" id="progressRight">正确率: <span id="accuracy" class="cur">0%</span></span>
+        </div>
+    </div>
+
+    <div class="page">
+        <div class="board-wrap">
+            <div class="board-inner">
+                <div id="board"><div class="loading">正在加载...</div></div>
+            </div>
+        </div>
+
+        <div class="side">
+            <div id="navPanel" class="panel">
+                <div class="panel-title">导航</div>
+                <div id="navGrid" class="nav-grid">
+                    <button id="prevBtn" class="btn" disabled>上一题</button>
+                    <button id="nextBtn" class="btn" disabled>下一题</button>
+                    <button id="randomBtn" class="btn btn-dark btn-full">随机一题</button>
+                </div>
+                <div class="search-row" id="searchRow">
+                    <input id="searchInput" class="search-input" type="number" min="1" placeholder="输入题号">
+                    <button id="searchBtn" class="search-btn">跳转</button>
+                </div>
+            </div>
+
+            <div class="panel info-panel">
+                <div class="panel-title">题目信息</div>
+                <div class="info-sep"></div>
+                <div class="info-row"><span class="info-label">题号</span><span id="infoNumber" class="info-value">-</span></div>
+                <div class="info-row"><span class="info-label">难度</span><span id="infoDifficulty" class="info-value">初级</span></div>
+                <div class="info-row"><span class="info-label">先手</span><span id="infoTurn" class="info-value">黑先</span></div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">输入答案</div>
+                <div class="answer-group">
+                    <div class="answer-input-wrap">
+                        <input id="answerInput" class="answer-input" type="text" placeholder="如: 2 或 2又1/3">
+                        <span class="answer-unit">目</span>
+                    </div>
+                    <div class="property-group">
+                        <span class="property-label">性质:</span>
+                        <div class="property-options" id="propertyOptions">
+                            <div class="property-option active" data-value="sente">
+                                <span class="property-text">先手</span>
+                            </div>
+                            <div class="property-option" data-value="gote">
+                                <span class="property-text">后手</span>
+                            </div>
+                            <div class="property-option" data-value="reverse">
+                                <span class="property-text">逆收</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="submitBtn" class="submit-btn">提交答案</button>
+                    <div class="answer-hint">格式: 整数 | 带分数</div>
+                </div>
+                <div id="feedback" class="feedback"></div>
+            </div>
+
+            <div id="opPanel" class="panel">
+                <div class="panel-title">操作</div>
+                <div class="op-row">
+                    <button id="showAnswerBtn" class="btn btn-answer">显示答案</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="testStartPanel" class="test-start-panel" style="display:none;">
+        <div class="panel" style="max-width:320px;margin:0 auto;">
+            <div class="panel-title">选择测试难度</div>
+            <div class="test-diff-options">
+                <div class="test-option selected" data-diff="beginner">
+                    <div class="test-option-num">初级</div>
+                </div>
+                <div class="test-option" data-diff="intermediate">
+                    <div class="test-option-num">中级</div>
+                </div>
+                <div class="test-option" data-diff="advanced">
+                    <div class="test-option-num">高级</div>
+                </div>
+            </div>
+            <div class="panel-title" style="margin-top:16px;">选择测试题目数量</div>
+            <div class="test-options">
+                <div class="test-option" data-count="10">
+                    <div class="test-option-num">10 题</div>
+                </div>
+                <div class="test-option" data-count="20">
+                    <div class="test-option-num">20 题</div>
+                </div>
+                <div class="test-option selected" data-count="30">
+                    <div class="test-option-num">30 题</div>
+                </div>
+            </div>
+            <button id="startTestBtn" class="submit-btn">开始测试</button>
+        </div>
+    </div>
+
+    <div id="resultModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-title">测试完成</div>
+            <div class="modal-stats">
+                <div class="modal-stat">
+                    <div class="modal-stat-value" id="resultTotal">0</div>
+                    <div class="modal-stat-label">总题数</div>
+                </div>
+                <div class="modal-stat">
+                    <div class="modal-stat-value correct" id="resultCorrect">0</div>
+                    <div class="modal-stat-label">正确</div>
+                </div>
+                <div class="modal-stat">
+                    <div class="modal-stat-value wrong" id="resultWrong">0</div>
+                    <div class="modal-stat-label">错误</div>
+                </div>
+            </div>
+            <div class="modal-accuracy">
+                正确率: <strong id="resultAccuracy">0%</strong>
+            </div>
+            <button id="closeResultBtn" class="modal-btn">返回练习</button>
+        </div>
+    </div>
+
+    <footer>围棋官子练习 - 提高官子计算能力</footer>
+
+    <script>
+        const difficultyMap = {
+            beginner: '初级',
+            intermediate: '中级',
+            advanced: '高级'
+        };
+
+        let currentMode = 'free';
+        let currentDifficulty = 'beginner';
+        let currentIndex = -1;
+        let problems = [];
+        let allProblems = [];
+        let board = null;
+        let game = null;
+        let answerValue = null;
+        let answerProperty = null;
+        let answerShown = false;
+        let selectedProperty = 'sente';
+        let stats = JSON.parse(localStorage.getItem('guanzi_stats') || '{}');
+
+        let testCount = 30;
+        let testDifficulty = 'beginner';
+        let testProblems = [];
+        let testIndex = -1;
+        let testCorrect = 0;
+        let testWrong = 0;
+        let testAnswered = false;
+
+        const boardElem = document.getElementById('board');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const randomBtn = document.getElementById('randomBtn');
+        const currentProblemElem = document.getElementById('currentProblem');
+        const problemCountElem = document.getElementById('problemCount');
+        const progressFill = document.getElementById('progressFill');
+        const accuracyElem = document.getElementById('accuracy');
+        const progressLeft = document.getElementById('progressLeft');
+        const progressRight = document.getElementById('progressRight');
+        const infoNumber = document.getElementById('infoNumber');
+        const infoDifficulty = document.getElementById('infoDifficulty');
+        const infoTurn = document.getElementById('infoTurn');
+        const answerInput = document.getElementById('answerInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const feedback = document.getElementById('feedback');
+        const showAnswerBtn = document.getElementById('showAnswerBtn');
+        const navPanel = document.getElementById('navPanel');
+        const navGrid = document.getElementById('navGrid');
+        const opPanel = document.getElementById('opPanel');
+        const difficultyToggle = document.getElementById('difficultyToggle');
+        const diffBtns = document.querySelectorAll('.diff-btn');
+        const modeBtns = document.querySelectorAll('.mode-btn');
+        const testStartPanel = document.getElementById('testStartPanel');
+        const resultModal = document.getElementById('resultModal');
+        const testOptions = document.querySelectorAll('.test-option');
+        const startTestBtn = document.getElementById('startTestBtn');
+        const closeResultBtn = document.getElementById('closeResultBtn');
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const searchRow = document.getElementById('searchRow');
+
+        const coordinates = {
+            grid: {
+                draw: function(args, board) {
+                    this.fillStyle = 'rgba(0,0,0,0.6)';
+                    this.textBaseline = 'middle';
+                    this.textAlign = 'center';
+                    this.font = (board.stoneRadius * 0.8) + 'px sans-serif';
+
+                    var yleft = board.getX(-0.75);
+                    var ybottom = board.getY(board.size - 0.25);
+
+                    for (var i = 0; i < board.size; i++) {
+                        var ch = i + 'A'.charCodeAt(0);
+                        if (ch >= 'I'.charCodeAt(0)) ch++;
+
+                        this.fillText(board.size - i, yleft, board.getY(i));
+                        this.fillText(String.fromCharCode(ch), board.getX(i), ybottom);
+                    }
+                }
+            }
+        };
+
+        function parseSGFProperty(content, propName) {
+            const results = [];
+            const propRegex = new RegExp(propName + '\\s*(?=\\[)', 'g');
+            let propMatch;
+            while ((propMatch = propRegex.exec(content)) !== null) {
+                let i = propMatch.index + propName.length;
+                while (i < content.length) {
+                    while (i < content.length && (content[i] === ' ' || content[i] === '\r' || content[i] === '\n' || content[i] === '\t')) i++;
+                    if (content[i] !== '[') break;
+                    i++;
+                    let value = '';
+                    while (i < content.length && content[i] !== ']') { value += content[i]; i++; }
+                    if (value) results.push(value);
+                    i++;
+                }
+            }
+            return results;
+        }
+
+        function parseSGFComment(sgfContent) {
+            const answerMatch = sgfContent.match(/C\[answer:([^\]]+)\]/);
+            if (answerMatch) {
+                return parseAnswerValue(answerMatch[1].trim());
+            }
+            const commentMatch = sgfContent.match(/C\[([^\]]+)\]/);
+            if (commentMatch) {
+                const numMatch = commentMatch[1].match(/([\d]+|[\d]+\/[\d]+|[\d]+又[\d]+\/[\d]+)\s*目/);
+                if (numMatch) return parseAnswerValue(numMatch[1]);
+            }
+            return null;
+        }
+
+        function parseAnswerValue(str) {
+            str = str.trim();
+
+            const intMatch = str.match(/^(\d+)$/);
+            if (intMatch) return parseInt(intMatch[1]);
+
+            const mixedMatch = str.match(/^(\d+)又(\d+)\/(\d+)$/);
+            if (mixedMatch) return parseInt(mixedMatch[1]) + parseInt(mixedMatch[2]) / parseInt(mixedMatch[3]);
+
+            return null;
+        }
+
+        function formatAnswer(value) {
+            if (value === null) return '-';
+
+            if (typeof value === 'string') return value;
+
+            if (Number.isInteger(value)) return value.toString();
+
+            for (let d = 2; d <= 12; d++) {
+                const num = value * d;
+                if (Math.abs(num - Math.round(num)) < 0.0001) {
+                    const n = Math.round(num);
+                    if (n === d) return '1';
+                    if (n % d === 0) return (n / d).toString();
+                    return simplifyFraction(n, d);
+                }
+            }
+
+            return '-';
+        }
+
+        function simplifyFraction(num, den) {
+            const g = gcd(Math.abs(num), den);
+            num /= g;
+            den /= g;
+            if (den === 1) return num.toString();
+            return num + '/' + den;
+        }
+
+        function gcd(a, b) {
+            a = Math.abs(a);
+            b = Math.abs(b);
+            while (b) {
+                [a, b] = [b, a % b];
+            }
+            return a;
+        }
+
+        function parseSGFTurn(sgfContent) {
+            if (sgfContent.includes('TR[')) {
+                return '黑先';
+            }
+            return '黑先';
+        }
+
+        function loadSGF(sgfContent) {
+            boardElem.innerHTML = '';
+            feedback.textContent = '';
+            feedback.className = 'feedback';
+
+            const sizeMatch = sgfContent.match(/SZ\[(\d+)\]/);
+            const size = sizeMatch ? parseInt(sizeMatch[1]) : 19;
+
+            game = new WGo.Game(size);
+
+            parseSGFProperty(sgfContent, 'AB').forEach(coord => {
+                var x = coord.charCodeAt(0) - 97;
+                var y = coord.charCodeAt(1) - 97;
+                game.addStone(x, y, WGo.B);
+            });
+            parseSGFProperty(sgfContent, 'AW').forEach(coord => {
+                var x = coord.charCodeAt(0) - 97;
+                var y = coord.charCodeAt(1) - 97;
+                game.addStone(x, y, WGo.W);
+            });
+
+            board = new WGo.Board(boardElem, {
+                size: size,
+                width: Math.min(640, boardElem.parentElement.clientWidth - 40),
+                section: { top: 0, left: -1, right: -1, bottom: -1 },
+                theme: {
+                    shadowBlur: 0,
+                    shadowSize: 0,
+                    shadowColor: 'transparent',
+                    gridLinesColor: '#b8a88c'
+                },
+                stoneHandler: WGo.Board.drawHandlers.NORMAL
+            });
+
+            board.addCustomObject(coordinates);
+            syncBoard();
+            lastBoardWidth = boardElem.parentElement.clientWidth;
+
+            const trCoords = parseSGFProperty(sgfContent, 'TR');
+            currentTRCoords = trCoords;
+            trCoords.forEach(coord => {
+                var x = coord.charCodeAt(0) - 97;
+                var y = coord.charCodeAt(1) - 97;
+                board.addObject({
+                    x: x,
+                    y: y,
+                    type: 'TR',
+                    c: '#3a4a5c'
+                });
+            });
+        }
+
+        function syncBoard() {
+            if (!board || !game) return;
+            board.removeAllObjects();
+            board.addCustomObject(coordinates);
+            var pos = game.position;
+            for (var x = 0; x < game.size; x++) {
+                for (var y = 0; y < game.size; y++) {
+                    var c = pos.get(x, y);
+                    if (c !== 0) {
+                        board.addObject({ x: x, y: y, c: c });
+                    }
+                }
+            }
+        }
+
+        function updateStats(correct) {
+            if (!stats[currentDifficulty]) {
+                stats[currentDifficulty] = { total: 0, correct: 0 };
+            }
+            stats[currentDifficulty].total++;
+            if (correct) stats[currentDifficulty].correct++;
+            localStorage.setItem('guanzi_stats', JSON.stringify(stats));
+        }
+
+        function getAccuracy() {
+            let total = 0, correct = 0;
+            for (const diff in stats) {
+                total += stats[diff].total;
+                correct += stats[diff].correct;
+            }
+            if (total === 0) return '0%';
+            return Math.round(correct / total * 100) + '%';
+        }
+
+        function updateProgress() {
+            if (currentMode === 'test') {
+                if (testProblems.length === 0) return;
+                currentProblemElem.textContent = testIndex + 1;
+                problemCountElem.textContent = testProblems.length;
+                const pct = ((testIndex + 1) / testProblems.length * 100).toFixed(1);
+                progressFill.style.width = pct + '%';
+                const total = testCorrect + testWrong;
+                const acc = total === 0 ? '0%' : Math.round(testCorrect / total * 100) + '%';
+                accuracyElem.textContent = acc;
+            } else {
+                if (problems.length === 0) return;
+                currentProblemElem.textContent = currentIndex + 1;
+                problemCountElem.textContent = problems.length;
+                const pct = ((currentIndex + 1) / problems.length * 100).toFixed(1);
+                progressFill.style.width = pct + '%';
+                accuracyElem.textContent = getAccuracy();
+            }
+        }
+
+        function updateButtons() {
+            if (currentMode === 'test') {
+                prevBtn.disabled = testIndex <= 0;
+                nextBtn.disabled = testIndex >= testProblems.length - 1;
+            } else {
+                prevBtn.disabled = currentIndex <= 0;
+                nextBtn.disabled = currentIndex >= problems.length - 1;
+            }
+        }
+
+        async function loadProblem(index, clearInput = true) {
+            selectedProperty = 'sente';
+            document.querySelectorAll('.property-option').forEach(el => {
+                el.classList.toggle('active', el.dataset.value === 'sente');
+            });
+
+            feedback.textContent = '';
+            feedback.className = 'feedback';
+            if (clearInput) answerInput.value = '';
+            showAnswerBtn.textContent = '显示答案';
+            answerShown = false;
+
+            if (currentMode === 'test') {
+                if (index < 0 || index >= testProblems.length) return;
+                testIndex = index;
+                testAnswered = false;
+                submitBtn.textContent = '提交答案';
+                const prob = testProblems[index];
+                infoNumber.textContent = prob.num;
+                infoDifficulty.textContent = difficultyMap[currentDifficulty];
+                infoTurn.textContent = prob.turn || '黑先';
+                answerValue = prob.answer;
+                answerProperty = prob.property;
+                boardElem.innerHTML = '<div class="loading">加载中...</div>';
+                const sgf = await loadSGFForProblem(prob);
+                if (sgf) loadSGF(sgf);
+                updateButtons();
+                updateProgress();
+            } else {
+                if (index < 0 || index >= problems.length) return;
+                currentIndex = index;
+                submitBtn.textContent = '提交答案';
+                const prob = problems[index];
+                infoNumber.textContent = prob.num;
+                infoDifficulty.textContent = difficultyMap[currentDifficulty];
+                infoTurn.textContent = prob.turn || '黑先';
+                answerValue = prob.answer;
+                answerProperty = prob.property;
+                boardElem.innerHTML = '<div class="loading">加载中...</div>';
+                const sgf = await loadSGFForProblem(prob);
+                if (sgf) loadSGF(sgf);
+                updateButtons();
+                updateProgress();
+            }
+        }
+
+        async function loadProblemList(difficulty) {
+            currentDifficulty = difficulty;
+            currentIndex = -1;
+            problems = [];
+
+            diffBtns.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.diff === difficulty);
+            });
+
+            try {
+                const [indexResp, answersResp] = await Promise.all([
+                    fetch(`data/problems/${difficulty}/index.json`),
+                    fetch(`data/problems/${difficulty}/answers.json`)
+                ]);
+                
+                let answers = {};
+                if (answersResp.ok) {
+                    answers = await answersResp.json();
+                }
+                
+                if (indexResp.ok) {
+                    const list = await indexResp.json();
+                    const turnMap = { 'b': '黑先', 'w': '白先' };
+                    for (const item of list) {
+                        const num = item.num || item.file.replace('.sgf', '');
+                        const answerData = answers[num] || {};
+                        problems.push({
+                            num: num,
+                            file: item.file,
+                            sgf: null,
+                            turn: turnMap[answerData.turn] || '黑先',
+                            answer: answerData.answer || null,
+                            property: answerData.property || 'sente'
+                        });
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to load problem list:', e);
+            }
+
+            if (currentMode === 'free') {
+                if (problems.length > 0) {
+                    loadProblem(0);
+                } else {
+                    boardElem.innerHTML = '<div class="error">暂无题目</div>';
+                    currentProblemElem.textContent = '-';
+                    problemCountElem.textContent = '0';
+                    progressFill.style.width = '0%';
+                }
+            } else {
+                if (problems.length > 0) {
+                    boardElem.innerHTML = '<div class="loading">准备就绪</div>';
+                    currentProblemElem.textContent = '-';
+                    problemCountElem.textContent = problems.length;
+                    progressFill.style.width = '0%';
+                    accuracyElem.textContent = '0%';
+                } else {
+                    boardElem.innerHTML = '<div class="error">暂无题目</div>';
+                    currentProblemElem.textContent = '-';
+                    problemCountElem.textContent = '0';
+                    progressFill.style.width = '0%';
+                }
+            }
+        }
+
+        async function loadSGFForProblem(prob) {
+            if (prob.sgf) return prob.sgf;
+            try {
+                const resp = await fetch(`data/problems/${currentDifficulty}/${prob.file}`);
+                if (resp.ok) {
+                    prob.sgf = await resp.text();
+                    return prob.sgf;
+                }
+            } catch (e) {
+                console.error('Failed to load SGF:', e);
+            }
+            return null;
+        }
+
+        function shuffleArray(arr) {
+            const a = [...arr];
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            modeBtns.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.mode === mode);
+            });
+
+            if (mode === 'test') {
+                progressRight.style.display = '';
+                testStartPanel.style.display = 'block';
+                document.querySelector('.page').style.display = 'none';
+                navPanel.style.display = 'none';
+                opPanel.style.display = 'none';
+                difficultyToggle.style.display = 'none';
+            } else {
+                progressRight.style.display = 'none';
+                testStartPanel.style.display = 'none';
+                document.querySelector('.page').style.display = '';
+                navPanel.style.display = '';
+                opPanel.style.display = '';
+                difficultyToggle.style.display = '';
+                if (problems.length > 0) loadProblem(0);
+            }
+        }
+
+        async function startTest() {
+            currentDifficulty = testDifficulty;
+            await loadProblemList(testDifficulty);
+            
+            const shuffled = shuffleArray(problems);
+            testProblems = shuffled.slice(0, Math.min(testCount, shuffled.length));
+            testIndex = -1;
+            testCorrect = 0;
+            testWrong = 0;
+            testAnswered = false;
+
+            testStartPanel.style.display = 'none';
+            document.querySelector('.page').style.display = '';
+            navPanel.style.display = 'none';
+            opPanel.style.display = 'none';
+
+            if (testProblems.length > 0) {
+                loadProblem(0);
+            } else {
+                boardElem.innerHTML = '<div class="error">题目不足，无法开始测试</div>';
+            }
+        }
+
+        function showResult() {
+            const total = testCorrect + testWrong;
+            const accuracy = total === 0 ? 0 : Math.round(testCorrect / total * 100);
+            document.getElementById('resultTotal').textContent = total;
+            document.getElementById('resultCorrect').textContent = testCorrect;
+            document.getElementById('resultWrong').textContent = testWrong;
+            document.getElementById('resultAccuracy').textContent = accuracy + '%';
+            resultModal.classList.add('show');
+        }
+
+        function goToNextProblem() {
+            if (currentMode === 'test') {
+                if (testIndex < testProblems.length - 1) {
+                    loadProblem(testIndex + 1);
+                } else {
+                    showResult();
+                }
+            } else {
+                if (currentIndex < problems.length - 1) {
+                    loadProblem(currentIndex + 1);
+                }
+            }
+        }
+
+        prevBtn.addEventListener('click', () => {
+            if (currentMode === 'test') {
+                if (testIndex > 0) loadProblem(testIndex - 1);
+            } else {
+                if (currentIndex > 0) loadProblem(currentIndex - 1);
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentMode === 'test') {
+                if (testIndex < testProblems.length - 1) loadProblem(testIndex + 1);
+            } else {
+                if (currentIndex < problems.length - 1) loadProblem(currentIndex + 1);
+            }
+        });
+
+        randomBtn.addEventListener('click', () => {
+            if (currentMode === 'test') return;
+            if (problems.length <= 1) return;
+            let idx;
+            do { idx = Math.floor(Math.random() * problems.length); } while (idx === currentIndex);
+            loadProblem(idx);
+        });
+
+        modeBtns.forEach(btn => {
+            btn.addEventListener('click', () => setMode(btn.dataset.mode));
+        });
+
+        diffBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (currentMode === 'test') return;
+                loadProblemList(btn.dataset.diff);
+            });
+        });
+
+        testOptions.forEach(opt => {
+            opt.addEventListener('click', () => {
+                if (opt.dataset.count) {
+                    document.querySelectorAll('.test-option[data-count]').forEach(o => o.classList.remove('selected'));
+                    opt.classList.add('selected');
+                    testCount = parseInt(opt.dataset.count);
+                }
+                if (opt.dataset.diff) {
+                    document.querySelectorAll('.test-option[data-diff]').forEach(o => o.classList.remove('selected'));
+                    opt.classList.add('selected');
+                    testDifficulty = opt.dataset.diff;
+                }
+            });
+        });
+
+        startTestBtn.addEventListener('click', startTest);
+
+        closeResultBtn.addEventListener('click', () => {
+            resultModal.classList.remove('show');
+            setMode('free');
+        });
+
+        function searchByNumber() {
+            if (currentMode !== 'free') return;
+            const num = parseInt(searchInput.value);
+            if (isNaN(num) || num < 1) {
+                feedback.textContent = '请输入有效的题号';
+                feedback.className = 'feedback wrong';
+                return;
+            }
+            const index = problems.findIndex(p => parseInt(p.num) === num);
+            if (index === -1) {
+                feedback.textContent = '未找到题号 ' + num;
+                feedback.className = 'feedback wrong';
+                return;
+            }
+            loadProblem(index);
+            searchInput.value = '';
+            feedback.textContent = '';
+            feedback.className = 'feedback';
+        }
+
+        searchBtn.addEventListener('click', searchByNumber);
+        searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') searchByNumber(); });
+
+        submitBtn.addEventListener('click', () => {
+            if (currentMode === 'test' && testAnswered) {
+                goToNextProblem();
+                return;
+            }
+
+            const inputStr = answerInput.value.trim();
+            if (!inputStr) {
+                feedback.textContent = '请输入答案';
+                feedback.className = 'feedback wrong';
+                return;
+            }
+
+            const userAnswer = parseAnswerValue(inputStr);
+            if (userAnswer === null) {
+                feedback.textContent = '无法识别输入格式，请输入如: 2、2又1/3';
+                feedback.className = 'feedback wrong';
+                return;
+            }
+
+            const propertyMap = { 'sente': '先手', 'gote': '后手', 'reverse': '逆收' };
+            const propertyText = propertyMap[selectedProperty];
+
+            if (answerValue === null) {
+                feedback.textContent = '该题目暂无标准答案';
+                feedback.className = 'feedback hint';
+                return;
+            }
+
+            const tolerance = 0.001;
+            let isCorrect;
+            if (typeof answerValue === 'string') {
+                isCorrect = inputStr === answerValue && selectedProperty === answerProperty;
+            } else {
+                isCorrect = Math.abs(userAnswer - answerValue) < tolerance && selectedProperty === answerProperty;
+            }
+
+            if (currentMode === 'test') {
+                testAnswered = true;
+                if (isCorrect) {
+                    feedback.textContent = '正确！' + formatAnswer(answerValue) + ' 目 ' + propertyText + '，点击"下一题"继续';
+                    feedback.className = 'feedback correct';
+                    testCorrect++;
+                } else {
+                    const correctPropertyText = propertyMap[answerProperty] || '';
+                    feedback.textContent = '错误，正确答案是 ' + formatAnswer(answerValue) + ' 目（' + correctPropertyText + '），点击"下一题"继续';
+                    feedback.className = 'feedback wrong';
+                    testWrong++;
+                }
+                submitBtn.textContent = '下一题';
+                updateProgress();
+            } else {
+                if (isCorrect) {
+                    feedback.textContent = '正确！官子大小为 ' + formatAnswer(answerValue) + ' 目，' + propertyText;
+                    feedback.className = 'feedback correct';
+                    updateStats(true);
+                } else {
+                    const correctPropertyText = propertyMap[answerProperty] || '';
+                    feedback.textContent = '错误，正确答案是 ' + formatAnswer(answerValue) + ' 目（' + correctPropertyText + '）';
+                    feedback.className = 'feedback wrong';
+                    updateStats(false);
+                }
+                updateProgress();
+            }
+        });
+
+        document.querySelectorAll('.property-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                selectedProperty = option.dataset.value;
+                document.querySelectorAll('.property-option').forEach(el => el.classList.remove('active'));
+                option.classList.add('active');
+            });
+        });
+
+        answerInput.addEventListener('keydown', e => { if (e.key === 'Enter') submitBtn.click(); });
+
+        let showAnswerLock = false;
+        showAnswerBtn.addEventListener('click', () => {
+            if (showAnswerLock) return;
+            showAnswerLock = true;
+            setTimeout(() => { showAnswerLock = false; }, 300);
+            if (answerShown) {
+                feedback.textContent = '';
+                feedback.className = 'feedback';
+                showAnswerBtn.textContent = '显示答案';
+                answerShown = false;
+                return;
+            }
+            if (answerValue === null) {
+                feedback.textContent = '该题目暂无标准答案';
+                feedback.className = 'feedback hint';
+                return;
+            }
+            const propertyNames = { 'sente': '先手', 'gote': '后手', 'reverse': '逆收' };
+            const propName = propertyNames[answerProperty] || '';
+            feedback.textContent = '答案：' + formatAnswer(answerValue) + ' 目（' + propName + '）';
+            feedback.className = 'feedback hint';
+            showAnswerBtn.textContent = '隐藏答案';
+            answerShown = true;
+        });
+
+        document.addEventListener('keydown', e => {
+            if (e.target.tagName === 'INPUT') return;
+            if (e.key === 'ArrowLeft') prevBtn.click();
+            else if (e.key === 'ArrowRight') nextBtn.click();
+        });
+
+        let resizeTimer;
+        let currentTRCoords = [];
+        let lastBoardWidth = 0;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (board) {
+                    const newWidth = boardElem.parentElement.clientWidth;
+                    if (Math.abs(newWidth - lastBoardWidth) < 5) return;
+                    lastBoardWidth = newWidth;
+                    syncBoard();
+                    currentTRCoords.forEach(coord => {
+                        var x = coord.charCodeAt(0) - 97;
+                        var y = coord.charCodeAt(1) - 97;
+                        board.addObject({ x: x, y: y, type: 'TR', c: '#3a4a5c' });
+                    });
+                }
+            }, 300);
+        });
+
+        loadProblemList('beginner');
+        progressRight.style.display = 'none';
+    </script>
+</body>
+</html>
