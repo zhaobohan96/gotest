@@ -1140,6 +1140,8 @@
                 console.error('Failed to load problem list:', e);
             }
 
+            problems.forEach(p => loadSGFForProblem(p));
+
             if (currentMode === 'free') {
                 if (problems.length > 0) {
                     loadProblem(0);
